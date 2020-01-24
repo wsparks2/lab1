@@ -40,7 +40,7 @@ using namespace std;
 #include <X11/keysym.h>
 #include <GL/glx.h>
 
-const int MAX_PARTICLES = 88888888;
+const int MAX_PARTICLES = 8;
 const float GRAVITY     = 0.1;
 
 //some structures
