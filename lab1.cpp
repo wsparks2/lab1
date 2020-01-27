@@ -222,8 +222,8 @@ void makeParticle(int x, int y)
 	p->s.center.y = y;
 	//p->velocity.y = -4.0;
 	p->velocity.x =  ((float)rand()/ (float)RAND_MAX) + 0.5;
-    p->velocity.y = ((float)rand()/ (float)RAND_MAX) + 0.5;
-    // set x velocity to random here too
+    	p->velocity.y = ((float)rand()/ (float)RAND_MAX) + 0.5;
+    	// set x and y velocity to a random value 
 	++g.n;
 }
 
@@ -248,7 +248,7 @@ void check_mouse(XEvent *e)
 			//Left button was pressed.
 			int y = g.yres - e->xbutton.y;
 			for (int i = 0; i < 20; i++){ 
-			    makeParticle(e->xbutton.x, y);
+				makeParticle(e->xbutton.x, y);
 			}
 			return;
 		}
@@ -308,9 +308,9 @@ void movement()
 	if (p->s.center.y < s->center.y + s->height && 
 		p->s.center.x > s->center.x - s->width &&
 		p->s.center.x < s->center.x + s->width &&
-	       	p->s.center.y > s->center.y - s->height  ){
-	    p->s.center.y = s->center.y + s->height;
-	    p->velocity.y = p->velocity.y *-.5;
+		p->s.center.y > s->center.y - s->height  ){
+		p->s.center.y = s->center.y + s->height;
+		p->velocity.y = p->velocity.y *-.5;
 	}
 
 
