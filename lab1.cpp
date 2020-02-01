@@ -39,8 +39,11 @@ using namespace std;
 #include <X11/Xlib.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
+#include "fonts.h"
+#include <unistd.h>
 
 const int MAX_PARTICLES = 4000;
+const int MAX_BOXES = 5;
 const float GRAVITY     = 0.1;
 
 //some structures
@@ -63,8 +66,11 @@ struct Particle {
 class Global {
 public:
 	int xres, yres;
-	Shape box;
+	int height, width;
+	int center_x, center_y;
+	Shape box[MAX_BOXES];
 	Particle particle[MAX_PARTICLES];
+	string display[MAX_BOXES];
 	int n;
 	Global();
 } g;
@@ -112,6 +118,7 @@ int main()
 		render();
 		x11.swapBuffers();
 	}
+	cleanup_fonts();
 	return 0;
 }
 
@@ -122,11 +129,26 @@ Global::Global()
 {
 	xres = 800;
 	yres = 600;
+	width = 100;
+	height = 10;	
+	center_x = 65 + 65 * 2.5;
+	center_y = 250 - 5 * 60;
+	display[0] = "Requirements";
+	display[1] = "Design";
+	display[2] = "Implementation";
+	display[3] = "Test";
+	display[4] = "Maintain";
 	//define a box shape
-	box.width = 100;
-	box.height = 10;
-	box.center.x = 120 + 5*65;
-	box.center.y = 500 - 5*60;
+	for (int i = 0; i < MAX_BOXES; i++) {
+		box[i].width = width;
+		box[i].height = height;
+		box[i].center.x = 300 + 65 * 2.5 - i * 50;
+		box[i].center.y = 550 - 5 * 60 + i * 50;
+	}
+	//box.width = 100;
+	//box.height = 10;
+	//box.center.x = 120 + 5*65;
+	//box.center.y = 450 - 5*60;
 	n = 0;
 }
 
@@ -207,6 +229,8 @@ void init_opengl(void)
 	glOrtho(0, g.xres, 0, g.yres, -1, 1);
 	//Set the screen background color
 	glClearColor(0.1, 0.1, 0.1, 1.0);
+	glEnable(GL_TEXTURE_2D);
+        initialize_fonts();
 }
 
 void makeParticle(int x, int y)
@@ -298,29 +322,31 @@ void movement()
 	if (g.n <= 0)
 		return;
     for (int i = 0; i < g.n; i++) {
-	Particle *p = &g.particle[i];
-	p->s.center.x += p->velocity.x;
+		Particle *p = &g.particle[i];
+		p->s.center.x += p->velocity.x;
     	p->velocity.y = p->velocity.y - GRAVITY;
-	p->s.center.y += p->velocity.y;
+		p->s.center.y += p->velocity.y;
 
-	//check for collision with shapes...
-	Shape *s = &g.box;
-	if (p->s.center.y < s->center.y + s->height && 
-		p->s.center.x > s->center.x - s->width &&
-		p->s.center.x < s->center.x + s->width &&
-		p->s.center.y > s->center.y - s->height  ){
-		p->s.center.y = s->center.y + s->height;
-		p->velocity.y = p->velocity.y *-.5;
-	}
+		//check for collision with shapes...
+		for (int i = 0; i < MAX_BOXES; i++) {
+			Shape *s = &g.box[i];
+			if (p->s.center.y < s->center.y + s->height && 
+				p->s.center.x > s->center.x - s->width &&
+				p->s.center.x < s->center.x + s->width &&
+				p->s.center.y > s->center.y - s->height  ){
+				p->s.center.y = s->center.y + s->height;
+				p->velocity.y = p->velocity.y *-.5;
+			}
+		}
 
 
 
-	//check for off-screen
-	if (p->s.center.y < 0.0) {
-		//cout << "off screen" << endl;
-        g.particle[i] = g.particle[g.n -1 ]; 
-		-- g.n;
-	}
+		//check for off-screen
+		if (p->s.center.y < 0.0) {
+			//cout << "off screen" << endl;
+        	g.particle[i] = g.particle[g.n -1 ]; 
+			-- g.n;
+		}
     
     }
 }
@@ -328,23 +354,30 @@ void movement()
 void render()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-	//Draw shapes...
-	//draw the box
-	Shape *s;
-	glColor3ub(90,140,90);
-	s = &g.box;
-	glPushMatrix();
-	glTranslatef(s->center.x, s->center.y, s->center.z);
+	Rect r;
 	float w, h;
-	w = s->width;
-	h = s->height;
-	glBegin(GL_QUADS);
-		glVertex2i(-w, -h);
-		glVertex2i(-w,  h);
-		glVertex2i( w,  h);
-		glVertex2i( w, -h);
-	glEnd();
-	glPopMatrix();
+	for (int i = 0; i < 5; i++) {
+
+		//Draw shapes...
+		//draw the box
+		Shape *s;
+		glColor3ub(90,140,90);
+
+		s = &g.box[i];
+		w = s->width;
+		h = s->height;
+		glPushMatrix();
+		glTranslatef(s->center.x, s->center.y, s->center.z);
+		//Addition here
+
+		glBegin(GL_QUADS);
+			glVertex2i(-w, -h);
+			glVertex2i(-w,  h);
+			glVertex2i( w,  h);
+			glVertex2i( w, -h);
+		glEnd();
+		glPopMatrix();
+	}
 	//
 	//Draw particles here
 	for (int i = 0; i < g.n; i++) {
@@ -361,6 +394,25 @@ void render()
 		glEnd();
 		glPopMatrix();
 	}
+	
+	for (int i = 5; i >= 0; i--) {
+		Rect r;
+		Shape *s;
+		s = &g.box[i];
+		r.bot = (s->center.y - .5 * s->height);
+		r.left = s->center.x - .5 * s->width;
+		glPushMatrix();
+		ggprint8b(&r, 16, 0x00001111, g.display[MAX_BOXES - i - 1].c_str());
+		glEnd();
+		glPopMatrix();
+
+	}	
+	//r.bot = (s->center.y - .5 * s->height);
+	//r.left = s->center.x - .5 * s->width;
+	//glPushMatrix();
+	//ggprint8b(&r, 16, 0x00001111, "3350 - Asteroids");
+	//glEnd();
+	//glPopMatrix();
 	//
 	//Draw your 2D text here
 
