@@ -354,7 +354,7 @@ void movement()
 void render()
 {
 	glClear(GL_COLOR_BUFFER_BIT);
-	Rect r;
+	
 	float w, h;
 	for (int i = 0; i < 5; i++) {
 
