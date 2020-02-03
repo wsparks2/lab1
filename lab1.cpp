@@ -230,7 +230,7 @@ void init_opengl(void)
 	//Set the screen background color
 	glClearColor(0.1, 0.1, 0.1, 1.0);
 	glEnable(GL_TEXTURE_2D);
-        initialize_fonts();
+	initialize_fonts();
 }
 
 void makeParticle(int x, int y)
@@ -246,7 +246,7 @@ void makeParticle(int x, int y)
 	p->s.center.y = y;
 	//p->velocity.y = -4.0;
 	p->velocity.x =  ((float)rand()/ (float)RAND_MAX) + 0.5;
-    	p->velocity.y = ((float)rand()/ (float)RAND_MAX) + 0.5;
+	p->velocity.y = ((float)rand()/ (float)RAND_MAX) + 0.5;
     	// set x and y velocity to a random value 
 	++g.n;
 }
@@ -289,7 +289,7 @@ void check_mouse(XEvent *e)
 			//Code placed here will execute whenever the mouse moves.
 			int y = g.yres - e->xbutton.y;
 			for (int i = 0; i < 20; i++){ 
-			    makeParticle(e->xbutton.x, y);
+				makeParticle(e->xbutton.x, y);
 			}
 
 		}
@@ -321,10 +321,10 @@ void movement()
 {
 	if (g.n <= 0)
 		return;
-    for (int i = 0; i < g.n; i++) {
+	for (int i = 0; i < g.n; i++) {
 		Particle *p = &g.particle[i];
 		p->s.center.x += p->velocity.x;
-    	p->velocity.y = p->velocity.y - GRAVITY;
+		p->velocity.y = p->velocity.y - GRAVITY;
 		p->s.center.y += p->velocity.y;
 
 		//check for collision with shapes...
@@ -333,7 +333,7 @@ void movement()
 			if (p->s.center.y < s->center.y + s->height && 
 				p->s.center.x > s->center.x - s->width &&
 				p->s.center.x < s->center.x + s->width &&
-				p->s.center.y > s->center.y - s->height  ){
+				p->s.center.y > s->center.y - s->height  ) {
 				p->s.center.y = s->center.y + s->height;
 				p->velocity.y = p->velocity.y *-.5;
 			}
@@ -344,11 +344,10 @@ void movement()
 		//check for off-screen
 		if (p->s.center.y < 0.0) {
 			//cout << "off screen" << endl;
-        	g.particle[i] = g.particle[g.n -1 ]; 
+			g.particle[i] = g.particle[g.n -1 ]; 
 			-- g.n;
 		}
-    
-    }
+	}
 }
 
 void render()
@@ -415,12 +414,6 @@ void render()
 	//glPopMatrix();
 	//
 	//Draw your 2D text here
-
-
-
-
-
-
 
 
 
